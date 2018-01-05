@@ -56,7 +56,7 @@ def getDayLessons(lessons, nextDay):
     return collections.OrderedDict(sorted(dayLessons.items())).items()
 
 async def helpCommand(client, message):
-    embed = discord.Embed(title="Listes des commandes", colour=discord.Colour.dark_red())
+    embed = discord.Embed(title="Liste des commandes", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     embed.description = "**.help** ou **.aide**\n"
     embed.description += "\t\tAffiche ce message\n\n"
@@ -65,11 +65,11 @@ async def helpCommand(client, message):
     embed.description += "**.next**\n"
     embed.description += "\t\tAffiche le prochain cours\n\n"
     embed.description += "**.day [DD/MM/YYYY]**\n"
-    embed.description += "\t\tAffiche les cours de la journée passé en arguments\n\tou la prochain journée de cours\n\n"
+    embed.description += "\t\tAffiche les cours de la journée passé en arguments\n\tou la prochaine journée de cours\n\n"
     embed.description += "**.wtf**\n"
     embed.description += "\t\tAffiche la super grimace de Mélenchon\n\n"
     embed.description += "**.fuck**\n"
-    embed.description += "\t\tAffiche une image « fuck » parmis une séléction\n\n"
+    embed.description += "\t\tAffiche une image « fuck » parmis une sélection\n\n"
     embed.description += "**.hendek**\n"
     embed.description += "\t\tAffiche l'image « Appelez les hendeks !! »\n\n"
     await client.send_message(message.channel, embed=embed)
