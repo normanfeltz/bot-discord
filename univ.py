@@ -19,9 +19,17 @@ def getLessons():
     gcal = Calendar.from_ical(request.read())
     return gcal.walk("VEVENT")
 
-def getNextLesson():
+def getNextDay(lessons):
+    nextDay = None
+    for lesson in lessons:
+        date = lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).date()
+        if nextDay == None or date < nextDay:
+            nextDay = date
+    return nextDay
+
+def getNextLesson(lessons):
     nextLesson = None
-    for lesson in getLessons():
+    for lesson in lessons:
         diff = lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone) - datetime.utcnow().replace(tzinfo=from_zone).astimezone(to_zone) - timedelta(minutes=60)
         if nextLesson == None or diff < nextLesson[0] and diff.total_seconds() > 0:
             nextLesson = list()
@@ -34,14 +42,7 @@ def getNextLesson():
             nextLesson.append(lesson.get("dtend").dt.replace(tzinfo=from_zone).astimezone(to_zone).strftime("%H:%M"))
     return nextLesson
 
-def getDayLessons(nextDay=None):
-    lessons = getLessons()
-    if nextDay is None:
-        for lesson in lessons:
-            date = lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).date()
-            if nextDay == None or date < nextDay:
-                nextDay = date
-
+def getDayLessons(lessons, nextDay):
     dayLessons = dict()
     for lesson in lessons:
         if nextDay == lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).date():
@@ -49,18 +50,19 @@ def getDayLessons(nextDay=None):
             dayLesson.append(lesson.get("summary"))
             dayLesson.append(lesson.get("location"))
             dayLesson.append(lesson.get("description").split("\n")[3])
-            dayLesson.append(lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).strftime("%d/%m/%Y"))
             dayLesson.append(lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).strftime("%H:%M"))
             dayLesson.append(lesson.get("dtend").dt.replace(tzinfo=from_zone).astimezone(to_zone).strftime("%H:%M"))
             dayLessons[mktime(lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).timetuple())] = dayLesson
     return collections.OrderedDict(sorted(dayLessons.items())).items()
+
 
 async def nextCommand(client, message):
     embed = discord.Embed(title="Prochain cours", description="Chargement en cours...", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     msg = await client.send_message(message.channel, embed=embed)
 
-    nextLesson = getNextLesson()
+    lessons = getLessons()
+    nextLesson = getNextLesson(lessons)
     embed.description = "{}\n".format(nextLesson[1])
     embed.description += "Le {} de {} à {}\n".format(nextLesson[4], nextLesson[5], nextLesson[6])
     embed.description += "Professeur: {}\n".format(nextLesson[3])
@@ -68,7 +70,7 @@ async def nextCommand(client, message):
     await client.edit_message(msg, embed=embed)
 
 async def dayCommand(client, message):
-    embed = discord.Embed(title="Prochain journée de cours", description="Chargement en cours...", colour=discord.Colour.dark_red())
+    embed = discord.Embed(title="", description="Chargement en cours...", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     msg = await client.send_message(message.channel, embed=embed)
 
@@ -79,26 +81,35 @@ async def dayCommand(client, message):
         except ValueError:
             embed.description = "Veuillez entrer une date au format JJ/MM/YYYY"
         else:
-            dayLessons = getDayLessons(nextDay)
+            lessons = getLessons()
+            dayLessons = getDayLessons(lessons, nextDay)
+
             if len(dayLessons) >= 1:
-                embed.description = "**Matin:**\n"
+                embed.title = "Cours du " + nextDay.strftime("%d/%m/%Y")
+                embed.description = "**Matin**\n"
                 for day, dayLesson in dayLessons:
-                    if dayLesson[4] == "13:30":
-                        embed.description += "\n**Après-midi:**\n"
+                    if dayLesson[3] == "13:30":
+                        embed.description += "\n**Après-midi**\n"
                     embed.description += "{}\n".format(dayLesson[0])
-                    embed.description += "Le {} de {} à {}\n".format(dayLesson[3], dayLesson[4], dayLesson[5])
+                    embed.description += "Début: {}\n".format(dayLesson[3])
+                    embed.description += "Fin: {}\n".format(dayLesson[4])
                     embed.description += "Professeur: {}\n".format(dayLesson[2])
                     embed.description += "Salle: {}\n".format(dayLesson[1])
             else:
                 embed.description = "Aucun cours"
     else:
-        dayLessons = getDayLessons()
-        embed.description = "**Matin:**\n"
+        lessons = getLessons()
+        nextDay = getNextDay(lessons)
+        dayLessons = getDayLessons(lessons, nextDay)
+
+        embed.title = "Cours du " + nextDay.strftime("%d/%m/%Y")
+        embed.description = "**Matin**\n"
         for day, dayLesson in dayLessons:
-            if dayLesson[4] == "13:30":
-                embed.description += "\n**Après-midi:**\n"
+            if dayLesson[3] == "13:30":
+                embed.description += "\n**Après-midi**\n"
             embed.description += "{}\n".format(dayLesson[0])
-            embed.description += "Le {} de {} à {}\n".format(dayLesson[3], dayLesson[4], dayLesson[5])
+            embed.description += "Début: {}\n".format(dayLesson[3])
+            embed.description += "Fin: {}\n".format(dayLesson[4])
             embed.description += "Professeur: {}\n".format(dayLesson[2])
             embed.description += "Salle: {}\n".format(dayLesson[1])
     await client.edit_message(msg, embed=embed)
