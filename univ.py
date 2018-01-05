@@ -55,6 +55,78 @@ def getDayLessons(nextDay=None):
             dayLessons[mktime(lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).timetuple())] = dayLesson
     return collections.OrderedDict(sorted(dayLessons.items())).items()
 
+async def nextCommand(client, message):
+    embed = discord.Embed(title="Prochain cours", description="Chargement en cours...", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    msg = await client.send_message(message.channel, embed=embed)
+
+    nextLesson = getNextLesson()
+    embed.description = "{}\n".format(nextLesson[1])
+    embed.description += "Le {} de {} à {}\n".format(nextLesson[4], nextLesson[5], nextLesson[6])
+    embed.description += "Professeur: {}\n".format(nextLesson[3])
+    embed.description += "Salle: {}\n".format(nextLesson[2])
+    await client.edit_message(msg, embed=embed)
+
+async def dayCommand(client, message):
+    embed = discord.Embed(title="Prochain journée de cours", description="Chargement en cours...", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    msg = await client.send_message(message.channel, embed=embed)
+
+    args = message.content.split(" ")
+    if len(args) >= 2:
+        try:
+            nextDay = datetime.strptime(args[1], "%d/%m/%Y").date()
+        except ValueError:
+            embed.description = "Veuillez entrer une date au format JJ/MM/YYYY"
+        else:
+            dayLessons = getDayLessons(nextDay)
+            if len(dayLessons) >= 1:
+                embed.description = "**Matin:**\n"
+                for day, dayLesson in dayLessons:
+                    if dayLesson[4] == "13:30":
+                        embed.description += "\n**Après-midi:**\n"
+                    embed.description += "{}\n".format(dayLesson[0])
+                    embed.description += "Le {} de {} à {}\n".format(dayLesson[3], dayLesson[4], dayLesson[5])
+                    embed.description += "Professeur: {}\n".format(dayLesson[2])
+                    embed.description += "Salle: {}\n".format(dayLesson[1])
+            else:
+                embed.description = "Aucun cours"
+    else:
+        dayLessons = getDayLessons()
+        embed.description = "**Matin:**\n"
+        for day, dayLesson in dayLessons:
+            if dayLesson[4] == "13:30":
+                embed.description += "\n**Après-midi:**\n"
+            embed.description += "{}\n".format(dayLesson[0])
+            embed.description += "Le {} de {} à {}\n".format(dayLesson[3], dayLesson[4], dayLesson[5])
+            embed.description += "Professeur: {}\n".format(dayLesson[2])
+            embed.description += "Salle: {}\n".format(dayLesson[1])
+    await client.edit_message(msg, embed=embed)
+
+async def wtfCommand(client, message):
+    embed = discord.Embed(title="What the Fuck ???", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url="http://ljdchost.com/BUBgLiw.gif")
+    await client.send_message(message.channel, embed=embed)
+
+async def fuckCommand(client, message):
+    fuck = ("https://ljdchost.com/CtDqj.gif", "http://ljdchost.com/Fmov8QZ.gif", "http://ljdchost.com/HLNRJHb.gif")
+    embed = discord.Embed(title="Fuck !!!!", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url=choice(fuck))
+    await client.send_message(message.channel, embed=embed)
+
+async def hendekCommand(client, message):
+    embed = discord.Embed(title="Appellez les hendeks !!!", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url="https://cdn.discordapp.com/attachments/358718175636094976/393357739805376524/209cml.jpg")
+    await client.send_message(message.channel, embed=embed)
+
+async def testCommand(client, message):
+    embed = discord.Embed(title="Test", description="Hello world !", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    await client.send_message(message.channel, embed=embed)
+
 if __name__ == '__main__':
     client = discord.Client()
 
@@ -68,71 +140,17 @@ if __name__ == '__main__':
     @client.event
     async def on_message(message):
         if message.content.startswith(".next"):
-            embed = discord.Embed(title="Prochain cours", description="Chargement en cours...", colour=discord.Colour.dark_red())
-            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-            msg = await client.send_message(message.channel, embed=embed)
-
-            nextLesson = getNextLesson()
-            embed.description = "{}\n".format(nextLesson[1])
-            embed.description += "Le {} de {} à {}\n".format(nextLesson[4], nextLesson[5], nextLesson[6])
-            embed.description += "Professeur: {}\n".format(nextLesson[3])
-            embed.description += "Salle: {}\n".format(nextLesson[2])
-            await client.edit_message(msg, embed=embed)
+            await nextCommand(client, message)
         elif message.content.startswith(".day"):
-            embed = discord.Embed(title="Prochain journée de cours", description="Chargement en cours...", colour=discord.Colour.dark_red())
-            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-            msg = await client.send_message(message.channel, embed=embed)
-
-            args = message.content.split(" ")
-            if len(args) >= 2:
-                try:
-                    nextDay = datetime.strptime(args[1], "%d/%m/%Y").date()
-                except ValueError:
-                    embed.description = "Veuillez entrer une date au format JJ/MM/YYYY"
-                else:
-                    dayLessons = getDayLessons(nextDay)
-                    if len(dayLessons) >= 1:
-                        embed.description = "**Matin:**\n"
-                        for day, dayLesson in dayLessons:
-                            if dayLesson[4] == "13:30":
-                                embed.description += "\n**Après-midi:**\n"
-                            embed.description += "{}\n".format(dayLesson[0])
-                            embed.description += "Le {} de {} à {}\n".format(dayLesson[3], dayLesson[4], dayLesson[5])
-                            embed.description += "Professeur: {}\n".format(dayLesson[2])
-                            embed.description += "Salle: {}\n".format(dayLesson[1])
-                    else:
-                        embed.description = "Aucun cours"
-            else:
-                dayLessons = getDayLessons()
-                embed.description = "**Matin:**\n"
-                for day, dayLesson in dayLessons:
-                    if dayLesson[4] == "13:30":
-                        embed.description += "\n**Après-midi:**\n"
-                    embed.description += "{}\n".format(dayLesson[0])
-                    embed.description += "Le {} de {} à {}\n".format(dayLesson[3], dayLesson[4], dayLesson[5])
-                    embed.description += "Professeur: {}\n".format(dayLesson[2])
-                    embed.description += "Salle: {}\n".format(dayLesson[1])
-            await client.edit_message(msg, embed=embed)
+            await dayCommand(client, message)
         elif message.content.startswith(".wtf"):
-            embed = discord.Embed(title="What the Fuck ???", colour=discord.Colour.dark_red())
-            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-            embed.set_image(url="http://ljdchost.com/BUBgLiw.gif")
-            await client.send_message(message.channel, embed=embed)
+            await wtfCommand(client, message)
         elif message.content.startswith(".fuck"):
-            fuck = ("https://ljdchost.com/CtDqj.gif", "http://ljdchost.com/Fmov8QZ.gif", "http://ljdchost.com/HLNRJHb.gif")
-            embed = discord.Embed(title="Fuck !!!!", colour=discord.Colour.dark_red())
-            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-            embed.set_image(url=choice(fuck))
-            await client.send_message(message.channel, embed=embed)
+            await fuckCommand(client, message)
         elif message.content.startswith(".hendek"):
-            embed = discord.Embed(title="Appellez les hendeks !!!", colour=discord.Colour.dark_red())
-            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-            embed.set_image(url="https://cdn.discordapp.com/attachments/358718175636094976/393357739805376524/209cml.jpg")
-            await client.send_message(message.channel, embed=embed)
+            await hendekCommand(client, message)
         elif message.content.startswith(".test"):
-            embed = discord.Embed(title="Test", description="Hello world !", colour=discord.Colour.dark_red())
-            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-            await client.send_message(message.channel, embed=embed)
+            await testCommand(client, message)
 
     with open("token.txt") as file:
         client.run(file.read())
