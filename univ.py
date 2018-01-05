@@ -2,13 +2,13 @@
 
 import discord
 import asyncio
-import collections
 from random import choice
 from time import mktime
 from dateutil import tz
 from datetime import datetime
 from datetime import timedelta
 from icalendar import Calendar
+from collections import OrderedDict
 from urllib.request import urlopen
 
 from_zone = tz.gettz("UTC")
@@ -53,25 +53,34 @@ def getDayLessons(lessons, nextDay):
             dayLesson.append(lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).strftime("%H:%M"))
             dayLesson.append(lesson.get("dtend").dt.replace(tzinfo=from_zone).astimezone(to_zone).strftime("%H:%M"))
             dayLessons[mktime(lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone).timetuple())] = dayLesson
-    return collections.OrderedDict(sorted(dayLessons.items())).items()
+    return OrderedDict(sorted(dayLessons.items())).items()
 
 async def helpCommand(client, message):
-    embed = discord.Embed(title="Liste des commandes", colour=discord.Colour.dark_red())
-    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-    embed.description = "**.help** ou **.aide**\n"
-    embed.description += "\t\tAffiche ce message\n\n"
-    embed.description += "**.test**\n"
-    embed.description += "\t\tAffiche « Hello world! »\n\n"
-    embed.description += "**.next**\n"
-    embed.description += "\t\tAffiche le prochain cours\n\n"
-    embed.description += "**.day [DD/MM/YYYY]**\n"
-    embed.description += "\t\tAffiche les cours de la journée passé en arguments\n\tou la prochaine journée de cours\n\n"
-    embed.description += "**.wtf**\n"
-    embed.description += "\t\tAffiche la super grimace de Mélenchon\n\n"
-    embed.description += "**.fuck**\n"
-    embed.description += "\t\tAffiche une image « fuck » parmis une sélection\n\n"
-    embed.description += "**.hendek**\n"
-    embed.description += "\t\tAffiche l'image « Appelez les hendeks !! »\n\n"
+    commands = OrderedDict()
+    commands["help"] = [".help [command]", "Si un argument est passé affiche l'aide la commane, sinon affiche la liste des commandes"]
+    commands["test"] = [".test", "Affiche « Hello world! »"]
+    commands["next"] = [".next", "Affiche le prochain cours"]
+    commands["day"] = [".day [DD/MM/YYYY]", "Affiche les cours de la journée passé en arguments ou la prochaine journée de cours"]
+    commands["wtf"] = [".wtf", "Affiche la super grimace de Mélenchon"]
+    commands["fuck"] = [".fuck", "Affiche une image « fuck » parmis une sélection"]
+    commands["hendek"] = [".hendek", "Affiche l'image « Appelez les hendeks !! »"]
+    
+    args = message.content.split(" ")
+    if len(args) >= 2:
+        embed = discord.Embed(colour=discord.Colour.dark_red())
+        embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+        if args[1] in commands:
+            embed.description = "**{}**\n".format(commands[args[1]][0])
+            embed.description += "\t\t{}\n\n".format(commands[args[1]][1])
+        else:
+            embed.description = "Cette commande n'existe pas"
+    else:
+        embed = discord.Embed(title="Liste des commandes", colour=discord.Colour.dark_red())
+        embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+        embed.description = ""
+        for command, infos in commands.items():
+            embed.description += "**{}**\n".format(infos[0])
+            embed.description += "\t\t{}\n\n".format(infos[1])
     await client.send_message(message.channel, embed=embed)
 
 async def testCommand(client, message):
@@ -178,7 +187,7 @@ if __name__ == '__main__':
             await fuckCommand(client, message)
         elif message.content.startswith(".hendek"):
             await hendekCommand(client, message)
-        elif message.content.startswith(".help") or message.content.startswith(".aide"):
+        elif message.content.startswith(".help"):
             await helpCommand(client, message)
         elif message.content.startswith(".test"):
             await testCommand(client, message)
