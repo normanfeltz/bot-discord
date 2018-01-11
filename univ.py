@@ -30,7 +30,7 @@ def getNextDay(lessons):
 def getNextLesson(lessons):
     nextLesson = None
     for lesson in lessons:
-        diff = lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone) - datetime.utcnow().replace(tzinfo=from_zone).astimezone(to_zone) - timedelta(minutes=60)
+        diff = lesson.get("dtstart").dt.replace(tzinfo=from_zone).astimezone(to_zone) - datetime.utcnow().replace(tzinfo=from_zone).astimezone(to_zone) + timedelta(minutes=60)
         if nextLesson == None or diff < nextLesson[0] and diff.total_seconds() > 0:
             nextLesson = list()
             nextLesson.append(diff)
@@ -57,7 +57,7 @@ def getDayLessons(lessons, nextDay):
 
 async def helpCommand(client, message):
     commands = OrderedDict()
-    commands["help"] = [".help [command]", "Si un argument est passé affiche l'aide la commane, sinon affiche la liste des commandes"]
+    commands["help"] = [".help [command]", "Si un argument est passé, on affiche l'aide de la commmande, sinon affiche la liste des commandes"]
     commands["test"] = [".test", "Affiche « Hello world! »"]
     commands["next"] = [".next", "Affiche le prochain cours"]
     commands["day"] = [".day [DD/MM/YYYY]", "Affiche les cours de la journée passé en arguments ou la prochaine journée de cours"]
