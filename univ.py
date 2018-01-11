@@ -165,6 +165,12 @@ async def hendekCommand(client, message):
     embed.set_image(url="https://cdn.discordapp.com/attachments/358718175636094976/393357739805376524/209cml.jpg")
     await client.send_message(message.channel, embed=embed)
 
+async def chehCommand(client, message):
+    embed = discord.Embed(title="Cheh !!", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url="http://m.memegen.com/9whbay.jpg")
+    await client.send_message(message.channel, embed=embed)
+
 if __name__ == '__main__':
     client = discord.Client()
 
@@ -191,6 +197,8 @@ if __name__ == '__main__':
             await fuckCommand(client, message)
         elif message.content.startswith(".hendek"):
             await hendekCommand(client, message)
+        elif message.content.startswith(".cheh"):
+            await chehCommand(client, message)
 
     with open("token.txt") as file:
         client.run(file.read())
