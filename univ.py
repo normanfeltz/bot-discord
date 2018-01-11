@@ -177,7 +177,11 @@ if __name__ == '__main__':
 
     @client.event
     async def on_message(message):
-        if message.content.startswith(".next"):
+        if message.content.startswith(".help"):
+            await helpCommand(client, message)
+        elif message.content.startswith(".test"):
+            await testCommand(client, message)
+        elif message.content.startswith(".next"):
             await nextCommand(client, message)
         elif message.content.startswith(".day"):
             await dayCommand(client, message)
@@ -187,10 +191,6 @@ if __name__ == '__main__':
             await fuckCommand(client, message)
         elif message.content.startswith(".hendek"):
             await hendekCommand(client, message)
-        elif message.content.startswith(".help"):
-            await helpCommand(client, message)
-        elif message.content.startswith(".test"):
-            await testCommand(client, message)
 
     with open("token.txt") as file:
         client.run(file.read())
