@@ -64,6 +64,8 @@ async def helpCommand(client, message):
     commands["wtf"] = [".wtf", "Affiche la super grimace de Mélenchon"]
     commands["fuck"] = [".fuck", "Affiche une image « fuck » parmis une sélection"]
     commands["hendek"] = [".hendek", "Affiche l'image « Appelez les hendeks !! »"]
+    commands["cheh"] = [".cheh", "Affiche l'image « Cheh !! »"]
+    commands["gogole"] = [".gogole", "Affiche l'image « Alerte au gogole !! »"]
     
     args = message.content.split(" ")
     if len(args) >= 2:
@@ -171,6 +173,12 @@ async def chehCommand(client, message):
     embed.set_image(url="http://m.memegen.com/9whbay.jpg")
     await client.send_message(message.channel, embed=embed)
 
+async def gogoleCommand(client, message):
+    embed = discord.Embed(title="Alerte au gogole !!", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url="https://cdn.discordapp.com/attachments/395330641283252224/402802078210195456/hqdefault.png")
+    await client.send_message(message.channel, embed=embed)
+
 if __name__ == '__main__':
     client = discord.Client()
 
@@ -199,6 +207,8 @@ if __name__ == '__main__':
             await hendekCommand(client, message)
         elif message.content.startswith(".cheh"):
             await chehCommand(client, message)
+        elif message.content.startswith(".gogole"):
+            await gogoleCommand(client, message)
 
-    with open("token.txt") as file:
+    with open("/root/Bot/token.txt") as file:
         client.run(file.read())
