@@ -2,6 +2,7 @@
 
 import discord
 import asyncio
+import bs4 as BeautifulSoup
 from random import choice
 from time import mktime
 from dateutil import tz
@@ -15,9 +16,13 @@ from_zone = tz.gettz("UTC")
 to_zone = tz.gettz("Europe/Paris")
 
 def getLessons():
-    request = urlopen("https://adewebcons.unistra.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=22647,22645,556&projectId=1&calType=ical&nbWeeks=14")
-    gcal = Calendar.from_ical(request.read())
-    return gcal.walk("VEVENT")
+    try:
+        request = urlopen("https://adewebcons.unistra.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=22647,22645,556&projectId=1&calType=ical&nbWeeks=14")
+    except urllib.error.HTTPError:
+        getLessons()
+    else:
+        gcal = Calendar.from_ical(request.read())
+        return gcal.walk("VEVENT")
 
 def getNextDay(lessons):
     nextDay = None
@@ -148,6 +153,29 @@ async def dayCommand(client, message):
             embed.description += "Salle: {}\n".format(dayLesson[1])
     await client.edit_message(msg, embed=embed)
 
+async def menuCommand(client, message):
+    embed = discord.Embed(title="Menu", description="Chargement en cours...", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    msg = await client.send_message(message.channel, embed=embed)
+
+    themes = list(["Entrées chaudes et froides", "Dessert", "Pâtes/Pizza", "Plat du jour", "Rôtisserie/Grillade", "Plat du monde"])
+
+    html = urlopen("http://www.crous-strasbourg.fr/restaurant/resto-u-illkirch/").read()
+    soup = BeautifulSoup.BeautifulSoup(html, "html.parser")
+
+    menu = soup.find_all("div",attrs={"class": u"content-repas"})[1].div
+    repas = menu.find_all("ul")
+
+    embed.title = soup.find("div",attrs={"id": u"menu-repas"}).ul.li.h3.string
+    embed.description = ""
+    for i in range(0, 6):
+        embed.description += "**" + themes[i] + "**\n"
+        for plat in repas[i].find_all("li"):
+            if plat.string != None:
+                embed.description += plat.string + "\n"
+        embed.description += "\n"
+    await client.edit_message(msg, embed=embed)
+
 async def wtfCommand(client, message):
     embed = discord.Embed(title="What the Fuck ???", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
@@ -199,6 +227,8 @@ if __name__ == '__main__':
             await nextCommand(client, message)
         elif message.content.startswith(".day"):
             await dayCommand(client, message)
+        elif message.content.startswith(".menu"):
+            await menuCommand(client, message)
         elif message.content.startswith(".wtf"):
             await wtfCommand(client, message)
         elif message.content.startswith(".fuck"):
