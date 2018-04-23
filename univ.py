@@ -66,6 +66,7 @@ async def helpCommand(client, message):
     commands["test"] = [".test", "Affiche « Hello world! »"]
     commands["next"] = [".next", "Affiche le prochain cours"]
     commands["day"] = [".day [DD/MM/YYYY]", "Affiche les cours de la journée passé en arguments ou la prochaine journée de cours"]
+    commands["menu"] = [".menu [i]", "Affiche le menu"]
     commands["wtf"] = [".wtf", "Affiche la super grimace de Mélenchon"]
     commands["fuck"] = [".fuck", "Affiche une image « fuck » parmis une sélection"]
     commands["hendek"] = [".hendek", "Affiche l'image « Appelez les hendeks !! »"]
@@ -154,7 +155,7 @@ async def dayCommand(client, message):
     await client.edit_message(msg, embed=embed)
 
 async def menuCommand(client, message):
-    embed = discord.Embed(title="Menu", description="Chargement en cours...", colour=discord.Colour.dark_red())
+    embed = discord.Embed(title="Menu de la semaine", description="Chargement en cours...", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     msg = await client.send_message(message.channel, embed=embed)
 
@@ -163,17 +164,35 @@ async def menuCommand(client, message):
     html = urlopen("http://www.crous-strasbourg.fr/restaurant/resto-u-illkirch/").read()
     soup = BeautifulSoup.BeautifulSoup(html, "html.parser")
 
-    menu = soup.find_all("div",attrs={"class": u"content-repas"})[1].div
-    repas = menu.find_all("ul")
+    week = soup.find("div", attrs={"id": u"menu-repas"}).ul
+    days = week.find_all("li", recursive=False)
 
-    embed.title = soup.find("div",attrs={"id": u"menu-repas"}).ul.li.h3.string
-    embed.description = ""
-    for i in range(0, 6):
-        embed.description += "**" + themes[i] + "**\n"
-        for plat in repas[i].find_all("li"):
-            if plat.string != None:
-                embed.description += plat.string + "\n"
-        embed.description += "\n"
+    args = message.content.split(" ")
+    if len(args) >= 2:
+        try:
+            day = int(args[1]) - 1
+            assert day > -1
+            assert day < len(days)
+        except (ValueError, Exception, AssertionError):
+            embed.description = ""
+            for i in range(len(days)):
+                embed.description += "{}. {}\n".format(i+1, days[i].h3.text)
+        else:
+            repas = days[day].div.find_all("div", recursive=False)[1].div.div
+            plats = repas.find_all("ul")
+
+            embed.description = ""
+            for i in range(0, 6):
+                embed.description += "**" + themes[i] + "**\n"
+                for plat in plats[i].find_all("li"):
+                    if plat.string != None:
+                        embed.description += plat.string[0].upper() + plat.string[1:].lower() + "\n"
+                embed.description += "\n"
+            embed.title = days[day].h3.text
+    else:
+        embed.description = ""
+        for i in range(len(days)):
+            embed.description += "{}. {}\n".format(i+1, days[i].h3.text)
     await client.edit_message(msg, embed=embed)
 
 async def wtfCommand(client, message):
