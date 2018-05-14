@@ -219,7 +219,7 @@ async def bllcCommand(client, message):
 async def osefCommand(client, message):
     embed = discord.Embed(title="Qui s'en fout ?", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-    embed.set_image(url="https://cdn.discordapp.com/attachments/408524101800689664/445584185055248384/img-261936594ad.png")
+    embed.set_image(url="https://cdn.discordapp.com/attachments/397445225561456640/445584739773186048/img-261936594ad.png")
     await client.send_message(message.channel, embed=embed)
 
 async def hendekCommand(client, message):
