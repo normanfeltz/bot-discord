@@ -69,6 +69,7 @@ async def helpCommand(client, message):
     commands["menu"] = [".menu [i]", "Affiche le menu"]
     commands["wtf"] = [".wtf", "Affiche la super grimace de Mélenchon"]
     commands["fuck"] = [".fuck", "Affiche une image « fuck » parmis une sélection"]
+    commands["bllc"] = [".bllc", "Affiche l'image « Jmen Balecouilles »"]
     commands["hendek"] = [".hendek", "Affiche l'image « Appelez les hendeks !! »"]
     commands["cheh"] = [".cheh", "Affiche l'image « Cheh !! »"]
     commands["gogole"] = [".gogole", "Affiche l'image « Alerte au gogole !! »"]
@@ -208,6 +209,12 @@ async def fuckCommand(client, message):
     embed.set_image(url=choice(fuck))
     await client.send_message(message.channel, embed=embed)
 
+async def bllcCommand(client, message):
+    embed = discord.Embed(title="Jmen Balecouilles", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url="https://cdn.discordapp.com/attachments/358712854834315264/445575286600499200/8vmobl.png")
+    await client.send_message(message.channel, embed=embed)
+
 async def hendekCommand(client, message):
     embed = discord.Embed(title="Appelez les hendeks !!", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
@@ -252,6 +259,8 @@ if __name__ == '__main__':
             await wtfCommand(client, message)
         elif message.content.startswith(".fuck"):
             await fuckCommand(client, message)
+        elif message.content.startswith(".bllc"):
+            await bllcCommand(client, message)
         elif message.content.startswith(".hendek"):
             await hendekCommand(client, message)
         elif message.content.startswith(".cheh"):
