@@ -70,6 +70,7 @@ async def helpCommand(client, message):
     commands["wtf"] = [".wtf", "Affiche la super grimace de Mélenchon"]
     commands["fuck"] = [".fuck", "Affiche une image « fuck » parmis une sélection"]
     commands["bllc"] = [".bllc", "Affiche l'image « Jmen Balecouilles »"]
+    commands["osef"] = [".osef", "Affiche l'image « Qui s'en fout ? »"]
     commands["hendek"] = [".hendek", "Affiche l'image « Appelez les hendeks !! »"]
     commands["cheh"] = [".cheh", "Affiche l'image « Cheh !! »"]
     commands["gogole"] = [".gogole", "Affiche l'image « Alerte au gogole !! »"]
@@ -215,6 +216,12 @@ async def bllcCommand(client, message):
     embed.set_image(url="https://cdn.discordapp.com/attachments/358712854834315264/445575286600499200/8vmobl.png")
     await client.send_message(message.channel, embed=embed)
 
+async def osefCommand(client, message):
+    embed = discord.Embed(title="Qui s'en fout ?", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_image(url="https://cdn.discordapp.com/attachments/408524101800689664/445584185055248384/img-261936594ad.png")
+    await client.send_message(message.channel, embed=embed)
+
 async def hendekCommand(client, message):
     embed = discord.Embed(title="Appelez les hendeks !!", colour=discord.Colour.dark_red())
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
@@ -261,6 +268,8 @@ if __name__ == '__main__':
             await fuckCommand(client, message)
         elif message.content.startswith(".bllc"):
             await bllcCommand(client, message)
+        elif message.content.startswith(".osef"):
+            await osefCommand(client, message)
         elif message.content.startswith(".hendek"):
             await hendekCommand(client, message)
         elif message.content.startswith(".cheh"):
