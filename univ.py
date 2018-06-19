@@ -64,6 +64,7 @@ async def helpCommand(client, message):
     commands = OrderedDict()
     commands["help"] = [".help [command]", "Si un argument est passé, on affiche l'aide de la commmande, sinon affiche la liste des commandes"]
     commands["test"] = [".test", "Affiche « Hello world! »"]
+    commands["mem"] = [".mem", "Affiche le temps restant avant de devoir rendre le mémoire"]
     commands["next"] = [".next", "Affiche le prochain cours"]
     commands["day"] = [".day [DD/MM/YYYY]", "Affiche les cours de la journée passé en arguments ou la prochaine journée de cours"]
     commands["menu"] = [".menu [i]", "Affiche le menu"]
@@ -95,6 +96,13 @@ async def helpCommand(client, message):
 
 async def testCommand(client, message):
     embed = discord.Embed(title="Test", description="Hello world !", colour=discord.Colour.dark_red())
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    await client.send_message(message.channel, embed=embed)
+
+async def memCommand(client, message):
+    diff = datetime(2018, 8, 19, 23, 55, 0) - datetime.now()
+    embed = discord.Embed(title="Temps restant avant de rendre le mémoire", colour=discord.Colour.dark_red())
+    embed.description = "{} jours, {} heure(s), et {} minute(s)".format(diff.days, diff.seconds // 3600, diff.seconds // 60 % 60)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     await client.send_message(message.channel, embed=embed)
 
@@ -256,6 +264,8 @@ if __name__ == '__main__':
             await helpCommand(client, message)
         elif message.content.startswith(".test"):
             await testCommand(client, message)
+        elif message.content.startswith(".mem"):
+            await memCommand(client, message)
         elif message.content.startswith(".next"):
             await nextCommand(client, message)
         elif message.content.startswith(".day"):
